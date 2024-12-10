@@ -1,11 +1,15 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { RoomComponent } from './room/room.component';
+import { SidebarComponent } from './sidebar/sidebar.component';
+import { PlayerNameDialogComponent } from './player-name-dialog/player-name-dialog.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [RouterOutlet, RoomComponent, SidebarComponent, PlayerNameDialogComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrls: ['./app.component.css'] // Use styleUrls here
 })
 export class AppComponent {
   title = 'quiz-game';

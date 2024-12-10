@@ -1,0 +1,33 @@
+<div class="sidebar">
+  <div class="player-list">
+    <div class="player-box"
+         *ngFor="let player of players"
+         [class.correct]="player.correct === true"
+         [class.incorrect]="player.correct === false">
+
+      <div class="player-info">
+        <!-- Left side: narrow column for pic and name -->
+        <div class="player-left">
+          <img class="player-profile-pic" src="https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg" alt="Profile">
+          <div class="player-username">{{ player.name }}</div>
+        </div>
+
+        <!-- Right side: three boxes always present -->
+        <div class="player-right">
+          <div class="score-percentage-container">
+            <div class="player-bet-box">
+              <span>{{ player.stake !== undefined ? player.stake + '%' : '\u00A0' }}</span>
+            </div>
+            <div class="player-score-box">
+              <span>{{ player.score !== undefined ? player.score : '\u00A0' }}</span>
+            </div>
+          </div>
+          <div class="player-answer-box">
+            <span>{{ player.answer !== undefined ? player.answer : '\u00A0' }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
