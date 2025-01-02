@@ -1,8 +1,8 @@
-import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
-import { GameService } from '../game.service';
+import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID, NgZone } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { NgForOf, NgIf } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { NgForOf, NgIf } from '@angular/common';
+import { GameService } from '../game.service';
 
 @Component({
   selector: 'app-room',
@@ -11,214 +11,226 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
   templateUrl: './room.component.html',
   styleUrls: ['./room.component.css'],
 })
-export class RoomComponent implements OnInit {
+export class RoomComponent implements OnInit, OnDestroy {
   playerName: string | null = null;
   playerScore: number = 4;
+
   gameStarted: boolean = false;
   currentQuestion: any = null;
   selectedAnswer: number | null = null;
   winner: string | null = null;
+  isHost: boolean = false;
 
-  countdown: number = 10;
-  showAnswer: boolean = false;
-  intervalId: any;
-  stakeIntervalId: any;
+  // Timer data from the server
+  timeRemaining: number = 0;
+  stakeRemaining: number = 100;
 
-  stake: number = 100;
+  // Additional flags
+  questionsLoaded: boolean = false;
+  loadingQuestions: boolean = false;
   answerChosen: boolean = false;
-  displayStake: number = 100;
 
-  questionsLoaded: boolean = false; // Track if questions are loaded
-  loadingQuestions: boolean = false; // Flag for loading questions
+  private eventSource: EventSource | null = null;
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private dialog: MatDialog,
-    private gameService: GameService
+    private gameService: GameService,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
       this.promptForPlayerName();
+      this.subscribeToGameState();
     }
   }
 
+  //=============================
+  //    Player Name
+  //=============================
   promptForPlayerName() {
-    if (isPlatformBrowser(this.platformId)) {
-      const name = prompt('Enter your player name:');
-      if (name !== null && name.trim() !== '') {
-        this.gameService.addPlayer(name).subscribe({
-          next: (player) => {
-            this.playerName = player.name;
-            this.playerScore = player.score;
-            this.loadQuestions(); // Ensure questions are loaded after adding the player
-          },
-          error: (err) => {
-            if (err.status === 409) {
-              alert('Player name already exists. Please choose a different name.');
-              this.promptForPlayerName();
-            } else {
-              console.error('Error adding player:', err);
-            }
-          },
-        });
-      } else {
-        alert('Player name is required.');
-        this.promptForPlayerName();
-      }
-    }
-  }
+    if (!isPlatformBrowser(this.platformId)) return;
 
-  loadQuestions() {
-    this.loadingQuestions = true;
-    this.gameService.loadQuestions().subscribe({
-      next: (response) => {
-        console.log('Questions loaded:', response);
-        this.questionsLoaded = true;
-        this.loadingQuestions = false;
-      },
-      error: (err) => {
-        console.error('Error loading questions:', err);
-        this.loadingQuestions = false;
-      },
-    });
-  }
-
-  startGame(): void {
-    if (this.questionsLoaded) {
-      this.gameStarted = true;
-      this.loadQuestion();
+    const name = prompt('Enter your player name:');
+    if (name && name.trim()) {
+      this.gameService.addPlayer(name).subscribe({
+        next: (player) => {
+          this.playerName = player.name;
+          this.playerScore = player.score;
+          this.isHost = player.isHost;
+        },
+        error: (err) => {
+          if (err.status === 409) {
+            alert('Player name already exists. Please choose a different name.');
+            this.promptForPlayerName();
+          } else {
+            console.error('Error adding player:', err);
+          }
+        },
+      });
     } else {
-      console.error('Questions are not yet loaded.');
-      alert('Please wait while questions are loading...');
+      alert('Player name is required.');
+      this.promptForPlayerName();
     }
   }
 
-  loadQuestion() {
-    if (!this.questionsLoaded) {
-      console.error('Cannot load question: Questions are not loaded.');
+  //=============================
+  //    SSE Subscription
+  //=============================
+  subscribeToGameState() {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    this.eventSource = new EventSource('http://localhost:3000/events');
+
+    this.eventSource.onmessage = (event) => {
+      this.ngZone.run(() => {
+        try {
+          const gameState = JSON.parse(event.data);
+          this.updateFromGameState(gameState);
+        } catch (e) {
+          console.error('Error parsing game state update:', e);
+        }
+      });
+    };
+
+    this.eventSource.onerror = (err) => {
+      console.error('EventSource failed:', err);
+      // Optionally handle SSE errors or attempt to reconnect
+    };
+  }
+
+  ngOnDestroy() {
+    if (this.eventSource) {
+      this.eventSource.close();
+      this.eventSource = null;
+    }
+  }
+
+  //=============================
+  //    Update from Game State
+  //=============================
+  updateFromGameState(gameState: any) {
+    this.gameStarted = gameState.gameStarted;
+    this.currentQuestion = gameState.currentQuestion;
+    this.winner = gameState.winner;
+    this.isHost = (gameState.host === this.playerName);
+    this.questionsLoaded = gameState.questionsLoaded;
+
+    // Timers from the server
+    this.timeRemaining = gameState.timeRemaining || 0;
+    this.stakeRemaining = gameState.stakeRemaining || 100;
+
+    // Update local score from server side
+    const me = gameState.players?.find((p: any) => p.name === this.playerName);
+    if (me) {
+      this.playerScore = me.score;
+    }
+
+    // If there's a winner, show final screen
+    if (this.winner) {
+      this.gameStarted = false;
+      const winImage = 'https://via.placeholder.com/400?text=Winner!';
+      const winMessage = `${this.winner} has won!`;
+      this.currentQuestion = {
+        image: winImage,
+        caption: winMessage,
+        answers: [],
+        correct: null,
+      };
+    }
+
+    // Fresh question => reset local selection flags
+    if (this.currentQuestion && this.timeRemaining === 10) {
+      this.selectedAnswer = null;
+      this.answerChosen = false;
+    }
+  }
+
+  //=============================
+  //    Start Game (Host Only)
+  //=============================
+  startGame(): void {
+    if (!this.isHost) {
+      console.error('Only the host can start the game');
       return;
     }
 
-    this.gameService.getQuestion().subscribe((data) => {
-      this.currentQuestion = data;
-      this.selectedAnswer = null;
-      this.showAnswer = false;
-      this.answerChosen = false;
-      this.stake = 100;
-      this.displayStake = 100;
-      this.startCountdown();
+    this.loadingQuestions = true;
+    this.gameService.loadQuestions().subscribe({
+      next: () => {
+        this.loadingQuestions = false;
+        this.gameService.startGame({ playerName: this.playerName! }).subscribe({
+          next: (startResponse) => {
+            console.log('Game started:', startResponse);
+            // SSE will keep us updated
+          },
+          error: (err) => {
+            console.error('Error starting game:', err);
+          },
+        });
+      },
+      error: (err) => {
+        this.loadingQuestions = false;
+        console.error('Error loading questions:', err);
+      },
     });
   }
 
-  startCountdown() {
-    if (!isPlatformBrowser(this.platformId)) return;
+  //=============================
+  //    Manually get next question (optional)
+  //=============================
+  loadQuestion() {
+    if (!this.questionsLoaded) {
+      console.error('No questions loaded yet.');
+      return;
+    }
+    if (!this.gameStarted) {
+      console.error('Game not started yet.');
+      return;
+    }
 
-    this.countdown = 10;
-
-    // Clear any previous intervals
-    if (this.intervalId) clearInterval(this.intervalId);
-    if (this.stakeIntervalId) clearInterval(this.stakeIntervalId);
-
-    // Stake decrement timer
-    this.stakeIntervalId = setInterval(() => {
-      if (this.stake > 25 && !this.answerChosen && !this.showAnswer) {
-        this.stake -= 1;
-        this.displayStake = this.stake;
-      }
-    }, 100);
-
-    // Countdown timer
-    this.intervalId = setInterval(() => {
-      this.countdown--;
-
-      if (this.countdown === 0) {
-        clearInterval(this.intervalId);
-        clearInterval(this.stakeIntervalId);
-        this.revealAndScore();
-      }
-    }, 1000);
+    this.gameService.getQuestion().subscribe({
+      next: (data) => {
+        console.log('Fetched next question from server:', data);
+      },
+      error: (err) => console.error('Error getting question:', err),
+    });
   }
 
+  //=============================
+  //    Select an Answer
+  //=============================
   selectAnswer(index: number) {
+    if (this.answerChosen || this.timeRemaining <= 0) {
+      return;
+    }
+
     this.selectedAnswer = index;
     this.answerChosen = true;
-    clearInterval(this.stakeIntervalId);
-  
+
     let answerText = 'No Answer';
-    if (this.selectedAnswer !== null && this.currentQuestion && this.currentQuestion.answers) {
-      answerText = this.currentQuestion.answers[this.selectedAnswer];
+    if (
+      this.currentQuestion &&
+      Array.isArray(this.currentQuestion.answers) &&
+      this.currentQuestion.answers[index]
+    ) {
+      answerText = this.currentQuestion.answers[index];
     }
-  
+
+    // Freeze the stake at the current value on the client
+    // (The server will keep decrementing stakeRemaining for other players.)
     const chosenData = {
       playerName: this.playerName,
-      stake: this.displayStake,
+      stake: this.stakeRemaining, // <= This is your local "locked" stake
       answer: answerText,
     };
-  
-    this.gameService.chooseAnswer(chosenData).subscribe(() => {
-      // Updates from the server
+
+    this.gameService.chooseAnswer(chosenData).subscribe({
+      next: () => {
+        // The server + SSE handle the rest
+      },
+      error: (err) => console.error('Error choosing answer:', err),
     });
   }
-  
-
-  revealAndScore() {
-    this.showAnswer = true;
-
-    this.submitAnswerAndScore((result: any) => {
-      if (result.winner) {
-        this.winner = result.winner;
-      }
-
-      setTimeout(() => {
-        if (this.winner) {
-          this.showWinScreen();
-        } else {
-          this.loadQuestion();
-        }
-      }, 4000);
-    });
-  }
-
-  showWinScreen() {
-    this.currentQuestion = null;
-    this.gameStarted = false;
-
-    const winImage = 'https://via.placeholder.com/400?text=Winner!';
-    const winMessage = `${this.winner} has won!`;
-
-    this.currentQuestion = {
-      image: winImage,
-      caption: winMessage,
-      answers: [],
-      correct: null,
-    };
-  }
-
-  submitAnswerAndScore(callback: (result: any) => void) {
-    let answerText = 'No Answer';
-    if (this.selectedAnswer !== null && this.currentQuestion && this.currentQuestion.answers) {
-      answerText = this.currentQuestion.answers[this.selectedAnswer];
-    }
-  
-    const answerData = {
-      playerName: this.playerName,
-      answer: answerText,
-      bet: this.displayStake / 100,
-    };
-  
-    this.gameService.submitAnswer(answerData).subscribe((result: any) => {
-      if (result.correct) {
-        const pointsEarned = Math.ceil(this.playerScore * (this.displayStake / 100));
-        this.playerScore += Math.max(pointsEarned, 1);
-      } else {
-        const pointsLost = Math.ceil(this.playerScore * (this.displayStake / 100));
-        this.playerScore -= pointsLost;
-        if (this.playerScore < 1) this.playerScore = 1;
-      }
-  
-      callback(result);
-    });
-  }
-  
-  }
+}

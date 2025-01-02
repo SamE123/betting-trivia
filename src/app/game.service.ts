@@ -35,6 +35,13 @@ export class GameService {
    * This should call the `/load-questions` endpoint to load questions from the CSV file
    */
   loadQuestions(): Observable<any> {
+    console.log("Game service call to load qs");
+    console.log(`${this.backendUrl}/load-questions`);
     return this.http.post(`${this.backendUrl}/load-questions`, {});
   }
+  
+  startGame(data: { playerName: string }): Observable<any> {
+    return this.http.post(`${this.backendUrl}/start-game`, data);
+  }
+  
 }

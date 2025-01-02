@@ -1,29 +1,39 @@
 <div class="room">
+
   <!-- Waiting state -->
   <div *ngIf="playerName && !gameStarted && !winner" class="placeholder-container">
     <img src="https://via.placeholder.com/400?text=Waiting+to+Start" alt="Waiting" class="placeholder-image">
     <p class="placeholder-caption">Please click "Start Game" to begin.</p>
-    <button class="start-button" (click)="startGame()">Start Game</button>
+    <button class="start-button" *ngIf="isHost" (click)="startGame()">Start Game</button>
   </div>
 
   <!-- Game state -->
-  <div *ngIf="gameStarted && !winner" class="game-container">
-    <img [src]="currentQuestion?.image" alt="Question Image" class="question-image">
+  <div *ngIf="gameStarted && !winner && currentQuestion" class="game-container">
 
-    <p class="question-text" *ngIf="!showAnswer">{{ currentQuestion?.caption }}</p>
-    <p class="question-text" *ngIf="showAnswer">The correct answer is: {{ currentQuestion?.correct }}</p>
-
-    <div class="info-panel">
-      <div class="info-item">Bet: {{ displayStake }}%</div>
-      <div class="info-item">{{ showAnswer ? '0s' : countdown + 's' }}</div>
+    <div class="img-container">
+      <img [src]="currentQuestion.image" alt="Question Image" class="question-image" />
     </div>
 
-    <div class="answers" [class.disabled]="showAnswer || answerChosen">
-      <div *ngFor="let answer of currentQuestion?.answers; let i = index"
-           class="answer"
-           [class.selected]="selectedAnswer === i"
-           (click)="!answerChosen && !showAnswer && selectAnswer(i)">
-        {{ answer }}
+    <p class="question-text" *ngIf="timeRemaining > 0">
+      {{ currentQuestion.caption }}
+    </p>
+    <p class="question-text" *ngIf="timeRemaining <= 0 && currentQuestion.correct">
+      The correct answer is: {{ currentQuestion.correct }}
+    </p>
+
+    <div class="info-panel">
+      <div class="info-item">Stake: {{ stakeRemaining }}%</div>
+      <div class="info-item">Time: {{ timeRemaining > 0 ? timeRemaining + 's' : '0s' }}</div>
+    </div>
+
+    <div class="answers" [class.disabled]="timeRemaining <= 0 || answerChosen">
+      <div
+        *ngFor="let ans of currentQuestion.answers; let i = index"
+        class="answer"
+        [class.selected]="selectedAnswer === i"
+        (click)="selectAnswer(i)"
+      >
+        {{ ans }}
       </div>
     </div>
   </div>
@@ -33,4 +43,5 @@
     <img [src]="currentQuestion?.image" alt="Winner Image" class="winner-image">
     <p class="win-caption">{{ currentQuestion?.caption }}</p>
   </div>
+
 </div>
