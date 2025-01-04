@@ -1,6 +1,6 @@
 
 export default {
-  basePath: '/',
+  basePath: '/betting-trivia/',
   entryPoints: {
     '': () => import('./main.server.mjs')
   },

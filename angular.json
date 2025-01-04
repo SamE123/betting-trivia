@@ -16,6 +16,7 @@
             "outputPath": "dist/quiz-game",
             "index": "src/index.html",
             "browser": "src/main.ts",
+            "baseHref": "/betting-trivia/",
             "polyfills": [
               "zone.js"
             ],
