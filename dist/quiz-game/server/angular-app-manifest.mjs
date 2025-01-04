@@ -2,18 +2,18 @@
 export default {
   bootstrap: () => import('./main.server.mjs').then(m => m.default),
   inlineCriticalCss: true,
-  baseHref: '/betting-trivia/',
+  baseHref: 'https://same123.github.io/betting-trivia/',
   locale: undefined,
   routes: [
   {
     "renderMode": 2,
-    "route": "/betting-trivia"
+    "route": "/https://same123.github.io/betting-trivia"
   }
 ],
   assets: {
-    'index.csr.html': {size: 14502, hash: 'cde27272f4922bb578c5d68f02cf610dddbc93320e288573462dd9e3b3075720', text: () => import('./assets-chunks/index_csr_html.mjs').then(m => m.default)},
-    'index.server.html': {size: 7980, hash: 'fcfdbf5237442e368380a47f21f2186708bf0f921a87ea83e4a54db51b13abe3', text: () => import('./assets-chunks/index_server_html.mjs').then(m => m.default)},
-    'index.html': {size: 22186, hash: '603b979e0c2c89e3646a9209e21f2ee52f6185052248e47a14ab0ac3fa85f290', text: () => import('./assets-chunks/index_html.mjs').then(m => m.default)},
+    'index.csr.html': {size: 14527, hash: 'ab6b53ee403d34c6f2e1c83f5c45154bd9bbb8829adf34ab0f91ba7ce1bdba25', text: () => import('./assets-chunks/index_csr_html.mjs').then(m => m.default)},
+    'index.server.html': {size: 8005, hash: '3d2c079c93cd7fffc52af95810a109c1f247fef1f7b6d8c02eb227cae0c410ca', text: () => import('./assets-chunks/index_server_html.mjs').then(m => m.default)},
+    'index.html': {size: 22211, hash: '00e5b27117bf8a05c3ca8ee1f717d074b958313649bbd2474c492e59ac52267d', text: () => import('./assets-chunks/index_html.mjs').then(m => m.default)},
     'styles-FOSFKDYQ.css': {size: 8935, hash: 'jDUAv5mEWh4', text: () => import('./assets-chunks/styles-FOSFKDYQ_css.mjs').then(m => m.default)}
   },
 };
