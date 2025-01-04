@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class GameService {
-  private backendUrl = 'http://localhost:3000'; // Adjust based on your backend setup
+  private backendUrl = 'http://localhost:3000'; // Adjust for your backend
 
   constructor(private http: HttpClient) {}
 
@@ -27,21 +27,34 @@ export class GameService {
   }
 
   chooseAnswer(data: any): Observable<any> {
+    console.log(data);
     return this.http.post(`${this.backendUrl}/choose-answer`, data);
   }
 
-  /**
-   * Load questions from the backend
-   * This should call the `/load-questions` endpoint to load questions from the CSV file
-   */
   loadQuestions(): Observable<any> {
-    console.log("Game service call to load qs");
-    console.log(`${this.backendUrl}/load-questions`);
+    console.log('Loading qs service call');
     return this.http.post(`${this.backendUrl}/load-questions`, {});
   }
   
   startGame(data: { playerName: string }): Observable<any> {
     return this.http.post(`${this.backendUrl}/start-game`, data);
   }
+
+  updateGameSettings(data: any): Observable<any>{
+    console.log("updating settings in service call");
+    return this.http.post(`${this.backendUrl}/update-settings`, data);
+  }
+
+  loadCategories(): Observable<{ categories: string[]; subcategories: string[] }> {
+    return this.http.get<{ categories: string[]; subcategories: string[] }>(`${this.backendUrl}/load-categories`);
+  }
+
+  resetGame(): Observable<any> {
+    return this.http.post(`${this.backendUrl}/reset-game`, {});
+  }
   
+
+
+
+
 }

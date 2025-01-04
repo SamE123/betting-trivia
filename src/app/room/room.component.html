@@ -1,23 +1,61 @@
-<div class="room">
+<button 
+  class="toggle-settings" 
+  *ngIf="isHost && canChangeSettings" 
+  (click)="toggleSettings()"
+  [disabled]="isUpdatingSettings"
+>
+  {{ showSettings ? 'Close Settings' : 'Open Settings' }}
+</button>
 
-  <!-- Waiting state -->
-  <div *ngIf="playerName && !gameStarted && !winner" class="placeholder-container">
-    <img src="https://via.placeholder.com/400?text=Waiting+to+Start" alt="Waiting" class="placeholder-image">
-    <p class="placeholder-caption">Please click "Start Game" to begin.</p>
-    <button class="start-button" *ngIf="isHost" (click)="startGame()">Start Game</button>
+
+<app-settings
+  *ngIf="showSettings"
+  class="settings-panel"
+  [phaseThreshold]="phaseThreshold"
+  [categories]="categories"
+  [subcategories]="subcategories"
+  [isHost]="isHost"
+  (applySettings)="updateSettings($event)"
+></app-settings>
+
+
+
+<div *ngIf="!showSettings" class="room">
+  
+  <!-- Placeholder state (before player joins or game starts) -->
+  <div *ngIf="!playerName && !gameStarted && !winner" class="game-container">
+    <div class="img-container">
+      <img src="https://via.placeholder.com/400?text=Waiting+for+Players" alt="Placeholder Image" class="question-image" />
+    </div>
+    <p class="question-caption">Waiting for players...</p>
   </div>
+
+  <!-- Waiting to start game state -->
+  <div *ngIf="playerName && !gameStarted && !winner" class="game-container">
+    <div class="img-container">
+      <img src="https://via.placeholder.com/400?text=Waiting+to+Start" alt="Placeholder Image" class="question-image" />
+    </div>
+    <p class="question-caption" *ngIf="!isHost">Waiting for the host to start the game...</p>
+    <button 
+    class="start-button" 
+    *ngIf="isHost && !gameStarted && !winner && !secondPlaythrough" 
+    (click)="startGame()" 
+    [disabled]="isUpdatingSettings"
+  >
+    Start Game
+  </button>
+    </div>
 
   <!-- Game state -->
   <div *ngIf="gameStarted && !winner && currentQuestion" class="game-container">
-
     <div class="img-container">
       <img [src]="currentQuestion.image" alt="Question Image" class="question-image" />
     </div>
 
-    <p class="question-text" *ngIf="timeRemaining > 0">
+    <p class="question-caption" *ngIf="timeRemaining > 0">
       {{ currentQuestion.caption }}
     </p>
-    <p class="question-text" *ngIf="timeRemaining <= 0 && currentQuestion.correct">
+    <p class="question-caption" *ngIf="timeRemaining <= 0 && currentQuestion.correct">
       The correct answer is: {{ currentQuestion.correct }}
     </p>
 
@@ -36,12 +74,30 @@
         {{ ans }}
       </div>
     </div>
-  </div>
-
+  </div> 
   <!-- Win state -->
-  <div *ngIf="winner" class="win-container">
-    <img [src]="currentQuestion?.image" alt="Winner Image" class="winner-image">
-    <p class="win-caption">{{ currentQuestion?.caption }}</p>
-  </div>
+<!-- Win state -->
+<div *ngIf="winner" class="game-container">
+  <div class ="img-container">
+  <img [src]="currentQuestion?.image" alt="Winner Image" class="question-image">
+
+  <p class="question-caption">Congratulations, {{ winner }}! You are the winner!</p>
+
+  <button 
+  *ngIf="isHost && winner" 
+  class="play-again" 
+  (click)="playAgain()" 
+>
+  Play Again
+</button>
 
 </div>
+
+
+
+
+</div>
+  
+</div>
+
+

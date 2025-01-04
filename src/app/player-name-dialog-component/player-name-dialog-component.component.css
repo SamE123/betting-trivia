@@ -1,0 +1,64 @@
+/* Ensures the text and controls fit neatly within the dialog. */
+
+/* Overall host container styling */
+:host {
+    display: block;
+    font-family: 'Roboto', sans-serif; /* or your main UI font */
+    color: #f0f0f0; /* matches the purple/dark theme from your room */
+  }
+  
+  /* Title */
+  .dialog-title {
+    margin: 0;
+    font-weight: 500;
+    color: #f0f0f0;
+    font-size: 1.2rem;
+  }
+  
+  /* Dialog content area */
+  .dialog-content {
+    padding: 0.5rem 1rem 1rem 1rem;
+  }
+  
+  /* Subtle text label */
+  .dialog-description {
+    margin: 0 0 1rem 0;
+    font-size: 0.95rem;
+    color: #ccc;
+  }
+  
+  /* The name field: full-width, "fill" appearance from Material */
+  .name-field {
+    width: 100%;
+  }
+  
+  /* The bottom row of actions */
+  .dialog-actions {
+    padding: 0 1rem 1rem 1rem;
+    margin-top: 0.5rem;
+  }
+  
+  /* Buttons align to the right, minimalistic styling */
+  .cancel-button,
+  .ok-button {
+    font-weight: 500;
+    text-transform: none;
+    /* same color scheme as your .answers or .start-button for consistency */
+  }
+  
+  .cancel-button {
+    color: #cfcfcf; /* lighter text color */
+    opacity: 0.85;
+  }
+  .cancel-button:hover {
+    background-color: rgba(255,255,255,0.08);
+  }
+  
+  .ok-button {
+    background-color: #5d3fd3; /* Dark purple */
+    color: #f0f0f0;
+  }
+  .ok-button:hover {
+    background-color: #4e4e7e; /* A slightly darker tone on hover */
+  }
+  

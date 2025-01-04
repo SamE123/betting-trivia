@@ -1,0 +1,74 @@
+/* Host container */
+:host {
+    display: block;
+    font-family: 'Roboto', sans-serif;
+    color: #000000; /* Light text on dark background */
+  }
+  
+  /* Center the dialog title text */
+  .dialog-title {
+    text-align: center;
+    font-size: 1.2rem;
+    margin: 0.5rem 0;
+    color: #8048b4;
+  }
+  
+  /* The main content area */
+  .dialog-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center horizontally */
+    padding: 1rem;
+    background: transparent; /* Let Material’s default dialog container show */
+  }
+  
+  /* The descriptive text above the field */
+  .dialog-description {
+    text-align: center;
+    font-size: 0.95rem;
+    color: #8048b4;
+    margin-bottom: 1rem;
+  }
+  
+  /* The mat-form-field, sized so input is well-centered */
+  .name-field {
+    width: 80%;
+    max-width: 300px; /* keeps input from getting too wide */
+    margin: 0 auto;
+  }
+  
+  /* The bottom row of actions, centered */
+  .dialog-actions {
+    margin-bottom: 1rem; /* spacing from the bottom of the dialog */
+  }
+  
+  /* 
+    Buttons 
+    - We keep the style minimal, 
+    - ensuring good contrast with the dark background.
+  */
+  .cancel-button,
+  .ok-button {
+    text-transform: none; /* keep normal text case */
+    font-weight: 500;
+    margin: 0 0.5rem; /* spacing between buttons */
+  }
+  
+  /* Subtle hover for Cancel */
+  .cancel-button {
+    color: #cfcfcf;
+    opacity: 0.85;
+  }
+  .cancel-button:hover {
+    background-color: rgba(255,255,255,0.08);
+  }
+  
+  /* Purple 'OK' button (like the rest of your UI) */
+  .ok-button {
+    background-color: #d3ffa0; 
+    color: #f0f0f0;
+  }
+  .ok-button:hover {
+    background-color: #a6f3c9;
+  }
+  

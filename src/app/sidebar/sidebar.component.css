@@ -1,5 +1,20 @@
+.leaderboard-header {
+  background: linear-gradient(135deg, #6b73ff, #000dff); /* Gradient background */
+  color: #ffffff; /* White text */
+  font-size: 1.5rem; /* Large font size */
+  text-align: center; /* Center the text */
+  padding: 10px; /* Spacing inside the header */
+  border-radius: 8px; /* Rounded corners */
+  font-weight: bold; /* Bold text */
+  margin-bottom: 15px; /* Space between header and player list */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Subtle shadow for a 3D effect */
+}
+
+
+
 .sidebar {
   width: 300px; /* Fixed width for sidebar */
+  height: 600px;
   background: rgba(0,0,0,0.3);
   border-radius: 8px;
   padding: 10px;
@@ -13,6 +28,16 @@
   flex-direction: column;
   gap: 10px;
   width: 100%;
+}
+
+.player-box.eliminated {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+.skull-emoji {
+  margin-left: 5px;
+  color: red; /* Optional: Add color for emphasis */
 }
 
 .player-box {
@@ -49,7 +74,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 60px;
+  width: 80px;
   gap: 2px;
   flex-shrink: 0;
 }
@@ -161,6 +186,27 @@
   width: 100%;
   text-align: center;
 }
+
+.system-message {
+  background: rgba(50, 50, 70, 0.8); /* Subtle background color */
+  color: #ffffff; /* White text */
+  font-size: 1rem; /* Adjust font size */
+  text-align: center; /* Center align text */
+  padding: 10px; /* Padding for spacing */
+  border-radius: 8px; /* Rounded corners */
+  margin-top: auto; /* Push it to the bottom of the sidebar */
+  box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.3); /* Shadow for separation */
+  font-style: italic; /* Optional: italicize for distinction */
+}
+
+.player-list-container {
+  flex: 1; /* Allow the player list to take up remaining space */
+  overflow-y: auto; /* Enable scrolling if content exceeds the container's height */
+  margin-bottom: 10px; /* Space between player list and system message */
+}
+
+
+
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {

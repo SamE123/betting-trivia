@@ -19,5 +19,6 @@
     font-family: sans-serif;
     overflow: hidden;
     box-sizing: border-box;
+    gap: 10px
   }
   
