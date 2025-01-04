@@ -1,6 +1,6 @@
 
 export default {
-  basePath: 'https://same123.github.io/betting-trivia/',
+  basePath: '/betting-trivia/',
   entryPoints: {
     '': () => import('./main.server.mjs')
   },
